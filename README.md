@@ -12,8 +12,8 @@ The motivation of this project is to build some interesting and insightful data 
 For data analyzing I used python in a jupyter notebook environment.
 
 ## Files
-•	Fordgobike-tripdata.csv (given by udacity)
-•	Data exploration notebook (and html)
+•	Fordgobike-tripdata.csv (provided by udacity) <br>
+•	Data exploration notebook (and html) <br>
 •	Data explanation notebook / Slide deck notebook (and html)
 •	Slide deck (html)
 •	Created files
