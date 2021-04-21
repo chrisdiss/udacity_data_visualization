@@ -14,10 +14,10 @@ For data analyzing I used python in a jupyter notebook environment.
 ## Files
 •	Fordgobike-tripdata.csv (provided by udacity) <br>
 •	Data exploration notebook (and html) <br>
-•	Data explanation notebook / Slide deck notebook (and html)
-•	Slide deck (html)
-•	Created files
-o	main_data.csv
-o	df_customers.csv
-o	df_stations_overview.csv
-o	df_stations_all.csv
+•	Data explanation notebook / Slide deck notebook (and html) <br>
+•	Slide deck (html) <br>
+•	Created files <br>
+  o	main_data.csv
+  o	df_customers.csv
+  o	df_stations_overview.csv
+  o	df_stations_all.csv
