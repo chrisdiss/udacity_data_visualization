@@ -21,11 +21,11 @@ The multivariate analysis shows that there is a connection between some stations
 
 The goal of this analysis was to provide valuable information for a bike sharing service provider to ensure service quality and improve the service. For this purpose following questions are from interest:
 
-•	Are there stations that are highly frequented?
-•	Is there a pattern starting and ending points of trips regarding to some stations?
-•	Are some stations highly connected to each other?
-•	Is there a usage pattern depending on the day of the week or the hour of the day?
-•	Can user characteristica be identified that drive a special usage behavior?
+•	Are there stations that are highly frequented? <br>
+•	Is there a pattern starting and ending points of trips regarding to some stations?<br>
+•	Are some stations highly connected to each other?<br>
+•	Is there a usage pattern depending on the day of the week or the hour of the day?<br>
+•	Can user characteristica be identified that drive a special usage behavior?<br>
 
 The analysis shows that there is a high difference in the frequency in the use of stations. The data shows that stations are generally higher or lower frequented. With this in mind, stations can be identifyied that have a crucial role in the system. Furthermore clusters of stations can be identifyied that are highly connected to each other. In those clusters the visualizations show the stations that are from particular interest. For improving the service the provider should pay attention to those stations and ensure the availability of bikes. Also data shows a usage pattern of the service depending on the day of the week and time of the day. During the week the service is higher frequented as well as in the morning and afternoon hours. Finally users from type customers have a different usage behavior than subscribers by having a longer mean duration of the trips. All this information can be used to ensure the quality of the service by recognising potential bottlenecks in the service and provide the designated stations with sufficient ressources.
 
