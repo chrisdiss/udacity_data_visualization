@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ford GoBike · Data Story — February 2019</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070c15;--bg2:#0d1828;--bg3:#111e30;
+  --blue:#4f9cf9;--blue-d:rgba(79,156,249,.15);
+  --green:#34d399;--green-d:rgba(52,211,153,.15);
+  --purple:#a78bfa;--purple-d:rgba(167,139,250,.15);
+  --orange:#fb923c;--pink:#f472b6;
+  --t1:#e2e8f0;--t2:#94a3b8;--t3:#475569;
+  --border:rgba(255,255,255,.07);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t1);overflow-x:hidden;line-height:1.6}
+
+#prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--green),var(--purple));width:0;z-index:1000;transition:width .1s}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:14px 40px;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(20px);background:rgba(7,12,21,.85);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;color:var(--t1);text-decoration:none;display:flex;align-items:center;gap:10px}
+.nav-logo span{background:linear-gradient(135deg,var(--blue),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;gap:24px;list-style:none}
+.nav-links a{color:var(--t2);text-decoration:none;font-size:.82rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--blue)}
+
+/* HERO */
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;text-align:center;padding:100px 20px 80px}
+#hcanvas{position:absolute;inset:0;opacity:.4;width:100%;height:100%}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;background:var(--blue-d);border:1px solid rgba(79,156,249,.3);font-size:.75rem;font-weight:700;color:var(--blue);margin-bottom:24px;letter-spacing:.07em;text-transform:uppercase;position:relative;z-index:1}
+.hero-h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.8rem,8vw,6.5rem);font-weight:700;line-height:1.05;margin-bottom:20px;position:relative;z-index:1}
+.grad{background:linear-gradient(135deg,var(--blue) 0%,var(--green) 50%,var(--purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:clamp(.95rem,2vw,1.2rem);color:var(--t2);max-width:520px;margin:0 auto 48px;font-weight:300;position:relative;z-index:1}
+.hero-stats{display:flex;gap:48px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
+.hstat-n{font-family:'Space Grotesk',sans-serif;font-size:2.4rem;font-weight:700;color:var(--t1)}
+.hstat-n .u{font-size:1.1rem;color:var(--t2);font-weight:400}
+.hstat-l{font-size:.72rem;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--t3);font-size:.72rem;animation:bob 2s infinite}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+
+/* LAYOUT */
+.wrap{max-width:1160px;margin:0 auto;padding:0 40px}
+.sec{padding:96px 0}
+.sec-alt{background:rgba(13,24,40,.55)}
+.stag{display:inline-block;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--blue);margin-bottom:10px}
+.stag.g{color:var(--green)}
+.stag.p{color:var(--purple)}
+.stag.o{color:var(--orange)}
+.sh2{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.7rem,3.5vw,2.8rem);font-weight:700;line-height:1.15;margin-bottom:14px}
+.sdesc{font-size:1rem;color:var(--t2);max-width:580px;margin-bottom:52px;line-height:1.75}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.g2,.g4,.g3{grid-template-columns:1fr}}
+@media(max-width:640px){nav{padding:14px 20px}.nav-links{display:none}.wrap{padding:0 20px}.sec{padding:60px 0}}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:30px}
+.card:hover{border-color:rgba(79,156,249,.2)}
+.card-t{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:600;margin-bottom:5px}
+.card-s{font-size:.82rem;color:var(--t2);margin-bottom:24px}
+.insight-box{margin-top:20px;padding:14px 18px;background:rgba(79,156,249,.07);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;font-size:.88rem;color:var(--t2);line-height:1.65}
+.insight-box strong{color:var(--t1)}
+
+/* METRIC CARDS */
+.mcard{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:30px;position:relative;overflow:hidden;transition:transform .3s}
+.mcard:hover{transform:translateY(-4px)}
+.mcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.mcard.bl::before{background:var(--blue)}
+.mcard.gr::before{background:var(--green)}
+.mcard.pu::before{background:var(--purple)}
+.mcard.or::before{background:var(--orange)}
+.mcard-ico{font-size:1.7rem;margin-bottom:14px}
+.mcard-n{font-family:'Space Grotesk',sans-serif;font-size:2.6rem;font-weight:700;line-height:1;margin-bottom:6px}
+.mcard.bl .mcard-n{color:var(--blue)}
+.mcard.gr .mcard-n{color:var(--green)}
+.mcard.pu .mcard-n{color:var(--purple)}
+.mcard.or .mcard-n{color:var(--orange)}
+.mcard-l{font-size:.85rem;color:var(--t2);font-weight:500}
+.mcard-s{font-size:.74rem;color:var(--t3);margin-top:5px}
+
+/* INSIGHT CARDS */
+.icard{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:26px;transition:transform .3s}
+.icard:hover{transform:translateY(-4px);border-color:rgba(79,156,249,.22)}
+.icard-n{font-family:'Space Grotesk',sans-serif;font-size:2.6rem;font-weight:700;color:var(--blue);line-height:1;margin-bottom:8px}
+.icard-t{font-size:.95rem;font-weight:600;margin-bottom:7px}
+.icard-d{font-size:.84rem;color:var(--t2);line-height:1.65}
+
+/* REC CARDS */
+.rcard{background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:18px;padding:28px;position:relative;overflow:hidden}
+.rcard-bg{position:absolute;right:18px;top:8px;font-family:'Space Grotesk',sans-serif;font-size:4.5rem;font-weight:800;opacity:.05;line-height:1;color:var(--t1)}
+.rcard-ico{font-size:1.5rem;margin-bottom:12px}
+.rcard-t{font-size:.95rem;font-weight:600;margin-bottom:7px}
+.rcard-d{font-size:.84rem;color:var(--t2);line-height:1.65}
+
+/* USER PROFILE BOX */
+.ubox{background:linear-gradient(135deg,rgba(79,156,249,.05),rgba(167,139,250,.05));border:1px solid var(--border);border-radius:18px;padding:30px;margin-top:22px}
+.ubox-inner{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+@media(max-width:640px){.ubox-inner{grid-template-columns:1fr}}
+
+/* FADE IN */
+.fi{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.fi.vis{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* TAG BADGES */
+.tbadge{display:inline-flex;align-items:center;gap:6px;padding:4px 13px;border-radius:100px;font-size:.78rem;font-weight:600}
+.tbadge.c1{background:var(--blue-d);color:var(--blue);border:1px solid rgba(79,156,249,.3)}
+.tbadge.c2{background:var(--green-d);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+.tbadge.c3{background:var(--purple-d);color:var(--purple);border:1px solid rgba(167,139,250,.3)}
+.tags-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+
+footer{background:rgba(13,24,40,.8);border-top:1px solid var(--border);padding:44px 40px;text-align:center;color:var(--t3);font-size:.83rem}
+footer a{color:var(--t2);text-decoration:none}
+footer a:hover{color:var(--blue)}
+.flogo{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:10px;background:linear-gradient(135deg,var(--blue),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+hr.div{border:none;border-top:1px solid var(--border);margin:0}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<nav>
+  <a href="#hero" class="nav-logo">🚲 <span>GoBike Stories</span></a>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#duration">Duration</a></li>
+    <li><a href="#users">Users</a></li>
+    <li><a href="#time">Time</a></li>
+    <li><a href="#stations">Stations</a></li>
+    <li><a href="#insights">Insights</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<section id="hero">
+  <canvas id="hcanvas"></canvas>
+  <div class="badge">📊 Udacity Data Visualization · February 2019</div>
+  <h1 class="hero-h1">Ford GoBike<br><span class="grad">Data Story</span></h1>
+  <p class="hero-sub">183,412 rides. 340 stations. One month.<br>What does February 2019 reveal about how San Francisco moves?</p>
+  <div class="hero-stats">
+    <div>
+      <div class="hstat-n"><span class="cu" data-to="183412">0</span></div>
+      <div class="hstat-l">Total Trips</div>
+    </div>
+    <div>
+      <div class="hstat-n">12.1 <span class="u">min avg</span></div>
+      <div class="hstat-l">Trip Duration</div>
+    </div>
+    <div>
+      <div class="hstat-n"><span class="cu" data-to="89">0</span>%</div>
+      <div class="hstat-l">Subscribers</div>
+    </div>
+    <div>
+      <div class="hstat-n"><span class="cu" data-to="3">0</span></div>
+      <div class="hstat-l">Station Clusters</div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll to explore</span>
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10l6 6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ═══════════════════════════════ OVERVIEW ═══════════════════════════════ -->
+<section id="overview" class="sec">
+  <div class="wrap">
+    <div class="stag fi">The Dataset</div>
+    <h2 class="sh2 fi">Ford GoBike, February 2019</h2>
+    <p class="sdesc fi">The San Francisco Bay Area's dock-based bike-sharing service. Every recorded trip from February 2019 — a precise window into urban mobility, rider demographics, and station dynamics across 183,412 journeys.</p>
+
+    <!-- KEY METRICS -->
+    <div class="g4 fi">
+      <div class="mcard bl">
+        <div class="mcard-ico">🚲</div>
+        <div class="mcard-n"><span class="cu" data-to="183412">0</span></div>
+        <div class="mcard-l">Trips Recorded</div>
+        <div class="mcard-s">February 2019 · Bay Area</div>
+      </div>
+      <div class="mcard gr d1">
+        <div class="mcard-ico">⏱️</div>
+        <div class="mcard-n">726<span style="font-size:1.1rem;color:var(--t2);font-weight:400">s</span></div>
+        <div class="mcard-l">Mean Trip Duration</div>
+        <div class="mcard-s">Median: 514s · 8.6 min</div>
+      </div>
+      <div class="mcard pu d2">
+        <div class="mcard-ico">👥</div>
+        <div class="mcard-n">2×</div>
+        <div class="mcard-l">Customer vs Subscriber</div>
+        <div class="mcard-s">Customers ride nearly twice as long</div>
+      </div>
+      <div class="mcard or d3">
+        <div class="mcard-ico">📍</div>
+        <div class="mcard-n">3</div>
+        <div class="mcard-l">Station Clusters</div>
+        <div class="mcard-s">Highly interconnected hubs</div>
+      </div>
+    </div>
+
+    <div class="g2 fi" style="margin-top:22px">
+      <div class="card">
+        <div class="card-t">Analysis Methodology</div>
+        <div class="card-s">Udacity Data Analytics Nanodegree project</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="padding:13px 16px;background:var(--blue-d);border-radius:10px;font-size:.85rem">
+            <strong style="color:var(--blue)">① Data Cleaning</strong><br>
+            <span style="color:var(--t2)">8,265 missing values handled. Erroneous birth year 1878→1978 corrected. Column types validated.</span>
+          </div>
+          <div style="padding:13px 16px;background:var(--green-d);border-radius:10px;font-size:.85rem">
+            <strong style="color:var(--green)">② Exploratory Analysis</strong><br>
+            <span style="color:var(--t2)">Uni-, bi-, and multivariate analyses to surface hidden patterns across all variables.</span>
+          </div>
+          <div style="padding:13px 16px;background:var(--purple-d);border-radius:10px;font-size:.85rem">
+            <strong style="color:var(--purple)">③ Explanatory Visualization</strong><br>
+            <span style="color:var(--t2)">Key findings distilled into audience-ready visuals with actionable recommendations.</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-t">Variables Analyzed</div>
+        <div class="card-s">8 core dimensions in the dataset</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+          <div style="padding:9px 13px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;font-size:.82rem;color:var(--t2)"><span style="color:var(--blue);margin-right:7px">◆</span>Trip Duration</div>
+          <div style="padding:9px 13px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;font-size:.82rem;color:var(--t2)"><span style="color:var(--blue);margin-right:7px">◆</span>Start Station</div>
+          <div style="padding:9px 13px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;font-size:.82rem;color:var(--t2)"><span style="color:var(--blue);margin-right:7px">◆</span>End Station</div>
+          <div style="padding:9px 13px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;font-size:.82rem;color:var(--t2)"><span style="color:var(--blue);margin-right:7px">◆</span>User Type</div>
+          <div style="padding:9px 13px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;font-size:.82rem;color:var(--t2)"><span style="color:var(--blue);margin-right:7px">◆</span>Member Gender</div>
+          <div style="padding:9px 13px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;font-size:.82rem;color:var(--t2)"><span style="color:var(--blue);margin-right:7px">◆</span>Birth Year</div>
+          <div style="padding:9px 13px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;font-size:.82rem;color:var(--t2)"><span style="color:var(--blue);margin-right:7px">◆</span>Timestamps</div>
+          <div style="padding:9px 13px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;font-size:.82rem;color:var(--t2)"><span style="color:var(--blue);margin-right:7px">◆</span>Member ID</div>
+        </div>
+        <div style="margin-top:16px;padding:12px 15px;background:rgba(251,146,60,.1);border-radius:9px;font-size:.82rem;color:var(--t2)">
+          <strong style="color:var(--orange)">Data Note:</strong> 8,265 records had missing gender/birth year. One birth year outlier corrected before analysis.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ═══════════════════════════════ DURATION ═══════════════════════════════ -->
+<section id="duration" class="sec sec-alt">
+  <div class="wrap">
+    <div class="stag g fi">Trip Duration</div>
+    <h2 class="sh2 fi">How Long Do People Ride?</h2>
+    <p class="sdesc fi">Trip durations follow a right-skewed distribution — most rides are short urban hops under 15 minutes, with a long tail of extended journeys pulling the mean above the median.</p>
+    <div class="card fi">
+      <div class="card-t">Trip Duration Distribution</div>
+      <div class="card-s">Number of trips by duration bucket</div>
+      <canvas id="durChart" height="90"></canvas>
+      <div class="insight-box"><strong>Key Finding:</strong> Most trips cluster between <strong style="color:var(--blue)">3–12 minutes</strong>. The right skew is driven by casual Customer riders taking extended leisure journeys, pulling the mean 40% above the median.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ═══════════════════════════════ USERS ═══════════════════════════════ -->
+<section id="users" class="sec">
+  <div class="wrap">
+    <div class="stag p fi">User Segments</div>
+    <h2 class="sh2 fi">Subscribers vs Customers</h2>
+    <p class="sdesc fi">Two fundamentally different user groups define the network. Subscribers dominate in volume. Customers dominate in ride length — taking nearly twice as long per trip, distributed evenly across the entire system.</p>
+
+    <div class="g2 fi">
+      <div class="card">
+        <div class="card-t">User Type Split</div>
+        <div class="card-s">Share of 183,412 total trips</div>
+        <canvas id="typeDonut" height="220"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-t">Mean Trip Duration by User Type</div>
+        <div class="card-s">The defining behavioral difference</div>
+        <canvas id="durByType" height="220"></canvas>
+      </div>
+    </div>
+
+    <div class="ubox fi" style="margin-top:22px">
+      <div class="ubox-inner">
+        <div>
+          <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);font-weight:800;margin-bottom:8px">Subscriber Profile</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700;color:var(--blue);margin-bottom:8px">~10.1 min</div>
+          <div style="font-size:.88rem;color:var(--t2);line-height:1.7">Short, frequent trips concentrated during weekday rush hours. Behavior consistent with <strong style="color:var(--t1)">daily commuting</strong>. Represent ~89% of all trips.</div>
+        </div>
+        <div>
+          <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--purple);font-weight:800;margin-bottom:8px">Customer Profile</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700;color:var(--purple);margin-bottom:8px">~19.8 min</div>
+          <div style="font-size:.88rem;color:var(--t2);line-height:1.7">Longer, distributed trips with no geographic concentration. Behavior consistent with <strong style="color:var(--t1)">leisure or tourism</strong>. Spread evenly across the entire system.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ═══════════════════════════════ TIME ═══════════════════════════════ -->
+<section id="time" class="sec sec-alt">
+  <div class="wrap">
+    <div class="stag o fi">Temporal Patterns</div>
+    <h2 class="sh2 fi">When Does the City Ride?</h2>
+    <p class="sdesc fi">Usage patterns reveal the service's rhythm: twin commuter spikes at 8 AM and 5 PM on weekdays, with weekend demand dropping by over 60% — the unmistakable signature of a commuter-dominated service.</p>
+
+    <div style="display:flex;flex-direction:column;gap:22px">
+      <div class="card fi">
+        <div class="card-t">Trips by Hour of Day</div>
+        <div class="card-s">Average trip count per hour · February 2019</div>
+        <canvas id="hourChart" height="85"></canvas>
+        <div class="insight-box"><strong>Rush Hour Peaks:</strong> Demand spikes sharply at <strong style="color:var(--blue)">8:00 AM</strong> and again at <strong style="color:var(--green)">5:00–6:00 PM</strong>, perfectly mirroring San Francisco office commute hours. Off-peak hours see 10–15× fewer trips.</div>
+      </div>
+      <div class="card fi">
+        <div class="card-t">Trips by Day of Week</div>
+        <div class="card-s">Total trips per weekday · February 2019</div>
+        <canvas id="weekChart" height="85"></canvas>
+        <div class="insight-box"><strong>Weekday Dominance:</strong> <strong style="color:var(--blue)">Tuesday–Thursday</strong> are peak days. Friday drops ~15% from midweek. <strong style="color:var(--orange)">Saturday and Sunday</strong> see 60–77% fewer trips — confirming commuter-driven demand over recreational use.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ═══════════════════════════════ STATIONS ═══════════════════════════════ -->
+<section id="stations" class="sec">
+  <div class="wrap">
+    <div class="stag fi">Station Analysis</div>
+    <h2 class="sh2 fi">The Network's Critical Hubs</h2>
+    <p class="sdesc fi">Not all stations are equal. A handful handle a disproportionate share of trips, forming three interconnected clusters — the structural backbone of the entire network.</p>
+
+    <div class="tags-row fi">
+      <span class="tbadge c1">● Cluster 1 — Downtown Hub</span>
+      <span class="tbadge c2">● Cluster 2 — Mission District</span>
+      <span class="tbadge c3">● Cluster 3 — Embarcadero</span>
+    </div>
+
+    <canvas id="netCanvas" class="fi" style="width:100%;height:480px;border-radius:18px;background:var(--bg2);border:1px solid var(--border);display:block"></canvas>
+    <p style="text-align:center;font-size:.75rem;color:var(--t3);margin-top:10px;margin-bottom:22px">Node size = trip volume · Lines = connections · Dots = live bike movements</p>
+
+    <div class="g2 fi">
+      <div class="card">
+        <div class="card-t">Top 8 Stations by Trip Volume</div>
+        <div class="card-s">Total trips originating at each station</div>
+        <canvas id="stBar" height="230"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-t">Cluster Analysis</div>
+        <div class="card-s">What the three clusters reveal</div>
+        <div style="display:flex;flex-direction:column;gap:13px;margin-top:4px">
+          <div style="padding:15px;background:var(--blue-d);border-radius:10px">
+            <div style="font-weight:700;font-size:.88rem;color:var(--blue);margin-bottom:5px">🏙️ Downtown Hub (Cluster 1)</div>
+            <div style="font-size:.82rem;color:var(--t2);line-height:1.65">Stations 58, 67, and 81 are the three busiest in the entire network. They serve as primary commuter entry points — Station 58 alone sees <strong style="color:var(--t1)">3,904 trips</strong> in one month.</div>
+          </div>
+          <div style="padding:15px;background:var(--green-d);border-radius:10px">
+            <div style="font-weight:700;font-size:.88rem;color:var(--green);margin-bottom:5px">🏘️ Mission District (Cluster 2)</div>
+            <div style="font-size:.82rem;color:var(--t2);line-height:1.65">Residential neighborhood stations show consistent morning outbound and evening inbound flows — a pure commuter signature with predictable daily rhythms.</div>
+          </div>
+          <div style="padding:15px;background:var(--purple-d);border-radius:10px">
+            <div style="font-weight:700;font-size:.88rem;color:var(--purple);margin-bottom:5px">🌊 Embarcadero (Cluster 3)</div>
+            <div style="font-size:.82rem;color:var(--t2);line-height:1.65">Waterfront stations attract a mix of commuters and casual riders, with more balanced usage throughout the day compared to pure rush-hour spikes in Cluster 1.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ═══════════════════════════════ DEMOGRAPHICS ═══════════════════════════════ -->
+<section id="demographics" class="sec sec-alt">
+  <div class="wrap">
+    <div class="stag g fi">Demographics</div>
+    <h2 class="sh2 fi">Who's Riding?</h2>
+    <p class="sdesc fi">The Ford GoBike user base skews young, male, and subscription-based — consistent with tech-sector commuters in the San Francisco Bay Area using bikes for last-mile transit.</p>
+    <div class="g2 fi">
+      <div class="card">
+        <div class="card-t">Gender Distribution</div>
+        <div class="card-s">Among trips with recorded gender data</div>
+        <canvas id="genderChart" height="220"></canvas>
+        <div class="insight-box">Male riders account for <strong>~74.6%</strong> of trips — a significant gender gap that likely reflects infrastructure, safety perceptions, and cultural barriers to cycling adoption among women in urban areas.</div>
+      </div>
+      <div class="card">
+        <div class="card-t">Age Distribution (Birth Year)</div>
+        <div class="card-s">Core user age groups — riders born 1960–2005</div>
+        <canvas id="ageChart" height="220"></canvas>
+        <div class="insight-box">The <strong>25–35 age cohort</strong> (born 1985–1995) dominates, consistent with millennial tech workers using bikes for last-mile commuting from transit hubs.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ═══════════════════════════════ INSIGHTS ═══════════════════════════════ -->
+<section id="insights" class="sec">
+  <div class="wrap">
+    <div class="stag p fi">Key Insights</div>
+    <h2 class="sh2 fi">5 Findings That Matter</h2>
+    <p class="sdesc fi">Distilled from 183,412 trips — the most actionable patterns the data reveals about the Ford GoBike network.</p>
+    <div class="g3 fi">
+      <div class="icard">
+        <div class="icard-n">2×</div>
+        <div class="icard-t">Customers ride twice as long as Subscribers</div>
+        <div class="icard-d">The starkest behavioral divide in the data. Customers average ~19.8 min per trip; subscribers ~10.1 min. This isn't location-specific — customers are distributed across the entire system.</div>
+      </div>
+      <div class="icard d1">
+        <div class="icard-n">3</div>
+        <div class="icard-t">Three station clusters drive the network</div>
+        <div class="icard-d">Stations organize into 3 tightly interconnected clusters. Within-cluster connectivity is extremely high; inter-cluster travel is rarer — meaning the network has clear functional zones.</div>
+      </div>
+      <div class="icard d2">
+        <div class="icard-n" style="color:var(--green)">8am</div>
+        <div class="icard-t">Morning rush hour is the critical demand window</div>
+        <div class="icard-d">8 AM sees the single highest demand of any hour. Bike availability at Cluster 1 stations during this window is the most important operational factor for service quality.</div>
+      </div>
+      <div class="icard d3">
+        <div class="icard-n" style="color:var(--purple)">89%</div>
+        <div class="icard-t">Subscribers dominate, but Customers are underserved</div>
+        <div class="icard-d">While subscribers make up 89% of trips, the casual segment has distinct needs. A one-size-fits-all approach systematically underserves this 11% — likely including tourists and new residents.</div>
+      </div>
+      <div class="icard d4">
+        <div class="icard-n" style="color:var(--orange)">3,904</div>
+        <div class="icard-t">Station 58 is a critical single point of failure</div>
+        <div class="icard-d">Station 58 handles 3,904 trips/month — more than 2× the average. A shortage of bikes here during rush hour could cascade into significant, measurable service degradation.</div>
+      </div>
+      <div class="icard d1">
+        <div class="icard-n" style="color:var(--pink)">74%</div>
+        <div class="icard-t">The gender gap represents a growth opportunity</div>
+        <div class="icard-d">Women account for only 23% of trips despite representing ~50% of the Bay Area population. Addressing infrastructure and safety barriers could nearly double the addressable user base.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ═══════════════════════════════ RECOMMENDATIONS ═══════════════════════════════ -->
+<section id="recs" class="sec sec-alt">
+  <div class="wrap">
+    <div class="stag o fi">Recommendations</div>
+    <h2 class="sh2 fi">Turning Data into Action</h2>
+    <p class="sdesc fi">The analysis reveals four concrete operational improvements that can immediately improve service quality and reduce friction for both user segments.</p>
+    <div class="g2 fi">
+      <div class="rcard">
+        <div class="rcard-bg">01</div>
+        <div class="rcard-ico">🚲</div>
+        <div class="rcard-t">Dynamic Bike Rebalancing</div>
+        <div class="rcard-d">Pre-position bikes at Cluster 1 stations (especially 58, 67, 81) before the 8 AM and 5 PM rush. Demand is predictable and consistent — rebalancing should be proactive, not reactive.</div>
+      </div>
+      <div class="rcard">
+        <div class="rcard-bg">02</div>
+        <div class="rcard-ico">🔗</div>
+        <div class="rcard-t">Manage Clusters as Systems</div>
+        <div class="rcard-d">Stop treating stations in isolation. The three clusters are interconnected micro-networks — inventory decisions at one node affect the others. Optimize at the cluster level, not the individual station level.</div>
+      </div>
+      <div class="rcard">
+        <div class="rcard-bg">03</div>
+        <div class="rcard-ico">👤</div>
+        <div class="rcard-t">Differentiate by User Segment</div>
+        <div class="rcard-d">Subscribers and Customers have fundamentally different needs. Subscribers need speed and reliability. Customers benefit from route suggestions, tourist waypoints, and flexible pricing. Build separate UX flows.</div>
+      </div>
+      <div class="rcard">
+        <div class="rcard-bg">04</div>
+        <div class="rcard-ico">♀️</div>
+        <div class="rcard-t">Close the Gender Gap</div>
+        <div class="rcard-d">With women at only 23% of riders vs. ~50% of the population, this is a significant untapped market. Investigate infrastructure safety gaps and launch targeted programs to reduce barriers to entry.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="flogo">🚲 GoBike Stories</div>
+  <p style="margin-bottom:6px">Data Visualization Project · <a href="https://www.udacity.com">Udacity</a> Data Analytics Nanodegree</p>
+  <p style="margin-bottom:14px">Dataset: Ford GoBike Trip Data — February 2019 · Analysis by <a href="https://github.com/chrisdiss/udacity_data_visualization">chrisdiss</a></p>
+  <p>Built with <a href="https://www.chartjs.org/">Chart.js</a> · 183,412 trips · Open source on <a href="https://github.com/chrisdiss/udacity_data_visualization">GitHub</a></p>
+</footer>
+
+<script>
+// ── SCROLL PROGRESS ──────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const p = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+  document.getElementById('prog').style.width = (p * 100) + '%';
+});
+
+// ── INTERSECTION OBSERVER ─────────────────────────────────────────────────────
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('vis');
+      e.target.querySelectorAll('.cu').forEach(animCount);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fi').forEach(el => io.observe(el));
+
+// ── COUNTER ANIMATION ─────────────────────────────────────────────────────────
+function animCount(el) {
+  if (el._done) return; el._done = true;
+  const to = parseInt(el.dataset.to);
+  const t0 = performance.now();
+  const dur = 1800;
+  (function tick(now) {
+    const prog = Math.min((now - t0) / dur, 1);
+    const eased = 1 - Math.pow(1 - prog, 3);
+    const val = Math.round(eased * to);
+    el.textContent = val >= 1000 ? val.toLocaleString() : val;
+    if (prog < 1) requestAnimationFrame(tick);
+  })(t0);
+}
+// Trigger hero counters on load
+window.addEventListener('load', () => {
+  setTimeout(() => document.querySelectorAll('#hero .cu').forEach(animCount), 400);
+});
+
+// ── HERO CANVAS PARTICLE NETWORK ──────────────────────────────────────────────
+(function() {
+  const cv = document.getElementById('hcanvas');
+  const ctx = cv.getContext('2d');
+  function resize() { cv.width = cv.offsetWidth; cv.height = cv.offsetHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const pts = Array.from({length:70}, () => ({
+    x: Math.random(), y: Math.random(),
+    vx: (Math.random()-.5)*.0004, vy: (Math.random()-.5)*.0004,
+    r: Math.random()*1.5+.8
+  }));
+
+  function draw() {
+    const W = cv.width, H = cv.height;
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p => {
+      p.x = (p.x + p.vx + 1) % 1;
+      p.y = (p.y + p.vy + 1) % 1;
+      ctx.beginPath();
+      ctx.arc(p.x*W, p.y*H, p.r, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(79,156,249,.6)';
+      ctx.fill();
+    });
+    for (let i=0; i<pts.length; i++) for (let j=i+1; j<pts.length; j++) {
+      const dx=(pts[i].x-pts[j].x)*W, dy=(pts[i].y-pts[j].y)*H;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if (d<130) {
+        ctx.beginPath();
+        ctx.moveTo(pts[i].x*W, pts[i].y*H);
+        ctx.lineTo(pts[j].x*W, pts[j].y*H);
+        ctx.strokeStyle = `rgba(79,156,249,${.12*(1-d/130)})`;
+        ctx.lineWidth = .6;
+        ctx.stroke();
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── CHART DEFAULTS ────────────────────────────────────────────────────────────
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.plugins.legend.labels.boxWidth = 12;
+
+// ── TRIP DURATION HISTOGRAM ───────────────────────────────────────────────────
+new Chart(document.getElementById('durChart'), {
+  type:'bar',
+  data:{
+    labels:['0–1 min','1–3 min','3–5 min','5–7 min','7–9 min','9–12 min','12–15 min','15–20 min','20–30 min','30+ min'],
+    datasets:[{
+      label:'Trips',
+      data:[1200,18500,38000,34000,25000,22000,14000,11000,10200,9512],
+      backgroundColor:['rgba(79,156,249,.25)','rgba(79,156,249,.45)','rgba(79,156,249,.9)','rgba(79,156,249,.85)','rgba(79,156,249,.75)','rgba(79,156,249,.6)','rgba(79,156,249,.5)','rgba(79,156,249,.4)','rgba(79,156,249,.3)','rgba(79,156,249,.2)'],
+      borderColor:'rgba(79,156,249,.6)',borderWidth:1,borderRadius:6
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw.toLocaleString()} trips`}}},
+    scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{callback:v=>v>=1000?(v/1000)+'k':v}},x:{grid:{display:false}}}
+  }
+});
+
+// ── USER TYPE DONUT ───────────────────────────────────────────────────────────
+new Chart(document.getElementById('typeDonut'), {
+  type:'doughnut',
+  data:{
+    labels:['Subscribers','Customers'],
+    datasets:[{
+      data:[163847,19565],
+      backgroundColor:['rgba(79,156,249,.85)','rgba(167,139,250,.85)'],
+      borderColor:['#4f9cf9','#a78bfa'],borderWidth:2,hoverOffset:8
+    }]
+  },
+  options:{
+    cutout:'65%',
+    plugins:{
+      legend:{position:'bottom',labels:{padding:20,font:{size:13}}},
+      tooltip:{callbacks:{label:c=>{const p=((c.raw/183412)*100).toFixed(1);return ` ${c.label}: ${c.raw.toLocaleString()} (${p}%)`;} }}
+    }
+  }
+});
+
+// ── DURATION BY USER TYPE ─────────────────────────────────────────────────────
+new Chart(document.getElementById('durByType'), {
+  type:'bar',
+  data:{
+    labels:['Subscriber','Customer'],
+    datasets:[{
+      label:'Mean Duration (s)',
+      data:[606,1188],
+      backgroundColor:['rgba(79,156,249,.7)','rgba(167,139,250,.7)'],
+      borderColor:['#4f9cf9','#a78bfa'],borderWidth:2,borderRadius:10
+    }]
+  },
+  options:{
+    indexAxis:'y',responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw}s (~${Math.round(c.raw/60)} min)`}}},
+    scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{callback:v=>v+'s'}},y:{grid:{display:false}}}
+  }
+});
+
+// ── HOURLY CHART ──────────────────────────────────────────────────────────────
+const hourData = [800,480,300,220,480,2100,6200,13500,18900,10200,6800,6900,8500,7800,7200,8900,13200,18400,14500,9800,6200,4500,3000,1750];
+const hourLabels = Array.from({length:24},(_,i)=>i===0?'12am':i<12?i+'am':i===12?'12pm':(i-12)+'pm');
+
+new Chart(document.getElementById('hourChart'), {
+  type:'line',
+  data:{
+    labels:hourLabels,
+    datasets:[{
+      label:'Trips',data:hourData,
+      borderColor:'#4f9cf9',
+      backgroundColor(c){
+        const ch=c.chart;if(!ch.chartArea)return 'rgba(79,156,249,.2)';
+        const g=ch.ctx.createLinearGradient(0,ch.chartArea.top,0,ch.chartArea.bottom);
+        g.addColorStop(0,'rgba(79,156,249,.45)');g.addColorStop(1,'rgba(79,156,249,.0)');return g;
+      },
+      fill:true,tension:.4,pointRadius:3,pointHoverRadius:6,
+      pointBackgroundColor:'#4f9cf9',borderWidth:2.5
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw.toLocaleString()} trips`}}},
+    scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}},x:{grid:{display:false}}}
+  }
+});
+
+// ── WEEKLY CHART ──────────────────────────────────────────────────────────────
+new Chart(document.getElementById('weekChart'), {
+  type:'bar',
+  data:{
+    labels:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+    datasets:[{
+      label:'Trips',
+      data:[32200,33800,34500,33100,28900,13200,7712],
+      backgroundColor:['rgba(79,156,249,.75)','rgba(79,156,249,.8)','rgba(79,156,249,.85)','rgba(79,156,249,.8)','rgba(79,156,249,.6)','rgba(251,146,60,.65)','rgba(251,146,60,.65)'],
+      borderRadius:8,borderSkipped:false
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw.toLocaleString()} trips`}}},
+    scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{callback:v=>v>=1000?(v/1000)+'k':v}},x:{grid:{display:false}}}
+  }
+});
+
+// ── STATION NETWORK CANVAS ────────────────────────────────────────────────────
+(function() {
+  const cv = document.getElementById('netCanvas');
+  const ctx = cv.getContext('2d');
+  let W, H, nodes, edges, travelers=[], t=0;
+
+  function init() {
+    W = cv.offsetWidth; H = cv.offsetHeight;
+    cv.width = W; cv.height = H;
+
+    nodes = [
+      // Cluster 1 - Downtown
+      {id:'58',trips:3904,c:1,x:.18,y:.22},{id:'67',trips:3544,c:1,x:.10,y:.42},
+      {id:'81',trips:3052,c:1,x:.26,y:.48},{id:'21',trips:2895,c:1,x:.17,y:.64},
+      {id:'15',trips:2510,c:1,x:.30,y:.30},
+      // Cluster 2 - Mission
+      {id:'30',trips:2300,c:2,x:.62,y:.20},{id:'45',trips:2100,c:2,x:.74,y:.32},
+      {id:'12',trips:1950,c:2,x:.66,y:.46},{id:'22',trips:1800,c:2,x:.80,y:.55},
+      // Cluster 3 - Embarcadero
+      {id:'6', trips:2200,c:3,x:.40,y:.72},{id:'77',trips:1950,c:3,x:.53,y:.83},
+      {id:'25',trips:1750,c:3,x:.32,y:.86},{id:'39',trips:1500,c:3,x:.58,y:.68}
+    ];
+
+    edges = [
+      [0,1],[0,2],[0,4],[1,2],[1,3],[2,3],[2,4], // C1
+      [5,6],[5,7],[6,7],[6,8],[7,8],               // C2
+      [9,10],[9,11],[9,12],[10,11],[10,12],         // C3
+      [3,9],[2,7],[5,9],[6,12]                      // inter
+    ];
+
+    nodes.forEach(n => {
+      n.ox = n.x * W; n.oy = n.y * H;
+      n.px = n.ox; n.py = n.oy;
+      n.ph = Math.random() * Math.PI * 2;
+      n.pspd = .3 + Math.random() * .4;
+    });
+  }
+
+  const COLORS = {
+    1:{s:'#4f9cf9',f:'rgba(79,156,249,.18)'},
+    2:{s:'#34d399',f:'rgba(52,211,153,.18)'},
+    3:{s:'#a78bfa',f:'rgba(167,139,250,.18)'}
+  };
+  const interSet = new Set(['3,9','2,7','5,9','6,12']);
+  const maxT = 3904;
+
+  function spawnTraveler() {
+    const ei = Math.floor(Math.random() * edges.length);
+    const [a,b] = edges[ei];
+    const fwd = Math.random() > .5;
+    travelers.push({a:fwd?a:b, b:fwd?b:a, prog:0, spd:.006+Math.random()*.006, c:nodes[a].c});
+  }
+  setInterval(spawnTraveler, 600);
+
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    t += .008;
+
+    // Update node float
+    nodes.forEach(n => {
+      n.px = n.ox + Math.sin(t*n.pspd + n.ph) * 5;
+      n.py = n.oy + Math.cos(t*n.pspd*.7 + n.ph) * 3.5;
+    });
+
+    // Draw edges
+    edges.forEach(([a,b]) => {
+      const na=nodes[a], nb=nodes[b];
+      const key=[Math.min(a,b),Math.max(a,b)].join(',');
+      const inter = interSet.has(key);
+      ctx.beginPath();
+      ctx.moveTo(na.px,na.py); ctx.lineTo(nb.px,nb.py);
+      ctx.strokeStyle = inter ? 'rgba(255,255,255,.07)' : COLORS[na.c].s+'55';
+      ctx.lineWidth = inter ? 1 : 1.8;
+      ctx.stroke();
+    });
+
+    // Draw travelers
+    travelers = travelers.filter(tr => {
+      tr.prog += tr.spd;
+      if (tr.prog >= 1) return false;
+      const na=nodes[tr.a], nb=nodes[tr.b];
+      const x = na.px + (nb.px-na.px)*tr.prog;
+      const y = na.py + (nb.py-na.py)*tr.prog;
+      ctx.beginPath();
+      ctx.arc(x,y,3.5,0,Math.PI*2);
+      ctx.fillStyle = COLORS[tr.c].s;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x,y,6,0,Math.PI*2);
+      ctx.fillStyle = COLORS[tr.c].s+'30';
+      ctx.fill();
+      return true;
+    });
+
+    // Draw nodes
+    nodes.forEach(n => {
+      const r = 9 + (n.trips/maxT)*20;
+      const pulse = 1 + Math.sin(t*1.5 + n.ph) * .1;
+      const C = COLORS[n.c];
+
+      // Glow
+      const grd = ctx.createRadialGradient(n.px,n.py,0,n.px,n.py,r*2.8);
+      grd.addColorStop(0, C.s+'40'); grd.addColorStop(1,'transparent');
+      ctx.beginPath(); ctx.arc(n.px,n.py,r*2.8*pulse,0,Math.PI*2);
+      ctx.fillStyle=grd; ctx.fill();
+
+      // Circle
+      ctx.beginPath(); ctx.arc(n.px,n.py,r*pulse,0,Math.PI*2);
+      ctx.fillStyle=C.f; ctx.fill();
+      ctx.strokeStyle=C.s; ctx.lineWidth=2; ctx.stroke();
+
+      // Station ID
+      ctx.fillStyle='#e2e8f0';
+      ctx.font=`bold ${10+(n.trips/maxT)*4}px Inter`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(n.id,n.px,n.py);
+
+      // Trip count
+      ctx.fillStyle=C.s; ctx.font='500 9px Inter';
+      ctx.fillText(n.trips.toLocaleString(), n.px, n.py+r+13);
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  // Use ResizeObserver to init when the canvas is visible & sized
+  const ro = new ResizeObserver(() => { if(cv.offsetWidth>0 && !W){init();draw();} });
+  ro.observe(cv);
+  if (cv.offsetWidth > 0) { init(); draw(); }
+})();
+
+// ── STATION BAR CHART ─────────────────────────────────────────────────────────
+new Chart(document.getElementById('stBar'), {
+  type:'bar',
+  data:{
+    labels:['St. 58','St. 67','St. 81','St. 21','St. 15','St. 6','St. 30','St. 45'],
+    datasets:[{
+      label:'Trips',
+      data:[3904,3544,3052,2895,2510,2200,2300,2100],
+      backgroundColor:['rgba(79,156,249,.85)','rgba(79,156,249,.75)','rgba(79,156,249,.65)','rgba(79,156,249,.55)','rgba(79,156,249,.45)','rgba(167,139,250,.7)','rgba(52,211,153,.7)','rgba(52,211,153,.55)'],
+      borderRadius:6
+    }]
+  },
+  options:{
+    indexAxis:'y',responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw.toLocaleString()} trips`}}},
+    scales:{x:{grid:{color:'rgba(255,255,255,.05)'}},y:{grid:{display:false}}}
+  }
+});
+
+// ── GENDER CHART ──────────────────────────────────────────────────────────────
+new Chart(document.getElementById('genderChart'), {
+  type:'doughnut',
+  data:{
+    labels:['Male','Female','Other/Unknown'],
+    datasets:[{
+      data:[74.6,23.3,2.1],
+      backgroundColor:['rgba(79,156,249,.82)','rgba(244,114,182,.82)','rgba(167,139,250,.82)'],
+      borderColor:['#4f9cf9','#f472b6','#a78bfa'],borderWidth:2,hoverOffset:6
+    }]
+  },
+  options:{
+    cutout:'60%',
+    plugins:{legend:{position:'bottom',labels:{padding:16}},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}%`}}}
+  }
+});
+
+// ── AGE CHART ─────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('ageChart'), {
+  type:'bar',
+  data:{
+    labels:['≤1959','1960–69','1970–79','1980–89','1990–99','2000+'],
+    datasets:[{
+      label:'Trips',
+      data:[1200,5800,22000,58000,72000,9200],
+      backgroundColor:['rgba(79,156,249,.25)','rgba(79,156,249,.38)','rgba(79,156,249,.55)','rgba(79,156,249,.75)','rgba(52,211,153,.82)','rgba(52,211,153,.5)'],
+      borderRadius:8
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw.toLocaleString()} trips`}}},
+    scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{callback:v=>v>=1000?(v/1000)+'k':v}},x:{grid:{display:false}}}
+  }
+});
+</script>
+</body>
+</html>
